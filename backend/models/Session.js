@@ -1,14 +1,25 @@
 const mongoose = require("mongoose");
 
 const SessionSchema = new mongoose.Schema({
-  proposalId: String,
-  requesterId: String,
-  helperId: String,
-  chatRoomId: String,
+
+  proposalId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Proposal"
+  },
+
+  requesterEmail: String,
+
+  mentorEmail: String,
+
+  scheduledTime: Date,
+
+  meetingLink: String,
+
   status: {
     type: String,
-    default: "active"
+    default: "scheduled"
   }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model("Session", SessionSchema);

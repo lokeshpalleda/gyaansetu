@@ -1,27 +1,73 @@
 const Session = require("../models/Session");
+const Proposal = require("../models/Proposal");
 
 exports.createSession = async (req, res) => {
 
   try {
 
-    const { proposalId, requesterId, helperId } = req.body;
+    const { proposalId, requesterEmail, mentorEmail, scheduledTime } = req.body;
+
+    // ✅ Check proposal exists
+    const proposal = await Proposal.findById(proposalId);
+
+    if (!proposal) {
+      return res.status(404).json({
+        message: "Proposal not found"
+      });
+    }
+
+    // ✅ Allow session only if proposal accepted
+    if (proposal.status !== "accepted") {
+      return res.status(400).json({
+        message: "Session can only be created after proposal is accepted"
+      });
+    }
+
+    // ✅ Time restriction (next 4 hours)
+    const selectedTime = new Date(scheduledTime);
+    const now = new Date();
+    const maxTime = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+
+    if (selectedTime < now || selectedTime > maxTime) {
+      return res.status(400).json({
+        message: "Mentor can only schedule within the next 4 hours"
+      });
+    }
+
+    // ✅ Mentor conflict check
+    const existingSession = await Session.findOne({
+      mentorEmail,
+      scheduledTime: selectedTime
+    });
+
+    if (existingSession) {
+      return res.status(400).json({
+        message: "Mentor already has a session at this time"
+      });
+    }
+
+    // ✅ Generate meeting link
+    const meetingLink = `https://meet.jit.si/gyaansetu-${proposalId}-${Date.now()}`;
 
     const session = new Session({
       proposalId,
-      requesterId,
-      helperId,
-      chatRoomId: "session_" + Date.now(),
-      status: "active"
+      requesterEmail,
+      mentorEmail,
+      scheduledTime: selectedTime,
+      meetingLink,
+      status: "scheduled"
     });
 
     await session.save();
 
-    res.json(session);
+    res.json({
+      message: "Session created successfully",
+      session
+    });
 
   } catch (error) {
-
-    res.status(500).json(error);
-
+    console.error("ERROR:", error);
+    res.status(500).json({ message: "Server error" });
   }
 
 };
