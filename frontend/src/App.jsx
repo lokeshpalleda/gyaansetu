@@ -28,3 +28,16 @@ function App() {
 }
 
 export default App;
+
+// import { Routes, Route } from "react-router-dom";
+// import AcceptProposal from "./pages/AcceptProposal";
+
+// function App() {
+//   return (
+//     <Routes>
+//       <Route path="/accept/:id" element={<AcceptProposal />} />
+//     </Routes>
+//   );
+// }
+
+// export default App;
