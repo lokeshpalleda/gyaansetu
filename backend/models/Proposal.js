@@ -4,14 +4,24 @@ const ProposalSchema = new mongoose.Schema({
 
   doubtId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Doubt"
+    ref: "Doubt",
+    required: true
   },
 
-  requesterEmail: String,
+  requesterEmail: {
+    type: String,
+    required: true
+  },
 
-  mentorEmail: String,
+  mentorEmail: {
+    type: String,
+    required: true
+  },
 
-  masterSentence: String,
+  masterSentence: {
+    type: String,
+    required: true
+  },
 
   status: {
     type: String,
@@ -19,7 +29,10 @@ const ProposalSchema = new mongoose.Schema({
     default: "pending"
   },
 
-  expiresAt: Date
+  expiresAt: {
+    type: Date,
+    required: true
+  }
 
 }, { timestamps: true });
 

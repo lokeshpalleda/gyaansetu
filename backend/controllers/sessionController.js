@@ -1,4 +1,5 @@
 const Session = require("../models/Session");
+const sendEmail = require("../services/emailService");
 const Proposal = require("../models/Proposal");
 
 exports.createSession = async (req, res) => {
@@ -59,6 +60,22 @@ exports.createSession = async (req, res) => {
     });
 
     await session.save();
+
+    console.log("SESSION SAVED");
+
+    // 📧 email message
+    const message = `
+Your session is scheduled.
+
+Time: ${scheduledTime}
+
+Meeting Link:
+${meetingLink}
+`;
+
+    // send emails
+    await sendEmail(requesterEmail, "Session Scheduled", message);
+    await sendEmail(mentorEmail, "Session Scheduled", message);
 
     res.json({
       message: "Session created successfully",
