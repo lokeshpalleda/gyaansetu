@@ -4,22 +4,33 @@ exports.matchMentors = async (req, res) => {
 
   try {
 
-    console.log("BODY:", req.body);   // add this
+    // get user input
+    const { title, description } = req.body;
 
-    const { keywords, userId } = req.body;
+    console.log("TITLE:", title);
+    console.log("DESCRIPTION:", description);
 
-    const helpers = await User.find({
+    // combine text
+    const text = `${title} ${description}`.toLowerCase();
+
+    // simple keyword extraction
+    const keywords = text.split(" ");
+
+    console.log("EXTRACTED KEYWORDS:", keywords);
+
+    // find mentors whose skills match any keyword
+    const mentors = await User.find({
       skills: { $in: keywords }
     });
 
-    console.log("MENTORS:", helpers);  // add this
+    console.log("MATCHED MENTORS:", mentors);
 
-    res.json(helpers);
+    res.json(mentors);
 
   } catch (error) {
 
-    console.log(error);
-    res.status(500).json(error);
+    console.error("ERROR:", error);
+    res.status(500).json({ message: "Server error" });
 
   }
 

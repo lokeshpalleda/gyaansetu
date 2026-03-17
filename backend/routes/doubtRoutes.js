@@ -3,10 +3,10 @@ const router = express.Router();
 
 const { createDoubt, submitAnswers } = require("../controllers/doubtController");
 
-// create doubt
+// Step 1: create doubt
 router.post("/doubt", createDoubt);
 
-// submit answers
-router.post("/doubt/answers", submitAnswers);
+// Step 2: submit answers
+router.post("/submit-answers", submitAnswers);
 
 module.exports = router;

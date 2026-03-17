@@ -1,14 +1,15 @@
 const Doubt = require("../models/Doubt");
+const User = require("../models/User");
 const analyzeDoubt = require("../utils/ai");
 
-// CREATE DOUBT (step 1)
+
+// STEP 1 — CREATE DOUBT
 exports.createDoubt = async (req, res) => {
 
   try {
 
     const { userId, title, description } = req.body;
 
-    // create new doubt
     const doubt = new Doubt({
       userId,
       title,
@@ -17,14 +18,12 @@ exports.createDoubt = async (req, res) => {
 
     await doubt.save();
 
-    // get last 5 doubts of this user
     const past = await Doubt.find({ userId })
       .sort({ createdAt: -1 })
       .limit(5);
 
     const pastQueries = past.map(d => d.description);
 
-    // run AI to generate clarification questions
     const aiResult = await analyzeDoubt(pastQueries, description);
 
     res.json({
@@ -42,7 +41,8 @@ exports.createDoubt = async (req, res) => {
 };
 
 
-// SUBMIT ANSWERS (step 2)
+
+// STEP 2 — SUBMIT ANSWERS
 exports.submitAnswers = async (req, res) => {
 
   try {
@@ -55,31 +55,39 @@ exports.submitAnswers = async (req, res) => {
       return res.status(404).json({ message: "Doubt not found" });
     }
 
-    // save answers
     doubt.answers = answers;
     await doubt.save();
 
-    // get past doubts
     const past = await Doubt.find({ userId: doubt.userId })
       .sort({ createdAt: -1 })
       .limit(5);
 
     const pastQueries = past.map(d => d.description);
 
-    // run AI again for keywords
     const aiResult = await analyzeDoubt(
       pastQueries,
       doubt.description + " " + answers.join(" ")
     );
 
-    doubt.keywords = aiResult.keywords;
-    doubt.masterSentence = aiResult.masterSentence;
+    await Doubt.findByIdAndUpdate(
+  doubtId,
+  {
+    keywords: aiResult.keywords,
+    masterSentence: aiResult.masterSentence,
+    answers
+  },
+  { returnDocument: "after" }
+);
 
-    await doubt.save();
+    // 🔥 FIND MENTORS USING KEYWORDS
+    const mentors = await User.find({
+      skills: { $in: aiResult.keywords }
+    });
 
     res.json({
       keywords: aiResult.keywords,
-      summary: aiResult.masterSentence
+      summary: aiResult.masterSentence,
+      mentors
     });
 
   } catch (error) {

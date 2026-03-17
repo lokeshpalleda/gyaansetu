@@ -3,83 +3,93 @@ import { useState } from "react";
 import Navbar from "../components/Navbar";
 import API from "../services/api";
 
-export default function Questions(){
+export default function Questions() {
 
- const location = useLocation();
- const navigate = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
 
- const { questions } = location.state || {};
+  // receive data from PostDoubt page
+  const { questions, doubtId } = location.state || {};
 
- const [answers,setAnswers] = useState({});
+  const [answers, setAnswers] = useState({});
 
- const handleChange = (qIndex,value) => {
+  const handleChange = (qIndex, value) => {
 
-  setAnswers({
-   ...answers,
-   [qIndex]: value
-  });
+    setAnswers({
+      ...answers,
+      [qIndex]: value
+    });
 
- };
+  };
 
- const submitAnswers = async () => {
+  const submitAnswers = async () => {
 
-  try{
+    try {
 
-   const res = await API.post("/match-mentors",{
-    answers
-   });
+      const res = await API.post("/submit-answers", {
+        doubtId,
+        answers: Object.values(answers)
+      });
 
-   console.log(res.data);
+      console.log(res.data);
 
-   // go to mentor list page
-   navigate("/mentors",{ state: res.data });
+      // navigate to mentors page
+      navigate("/mentors", {
+        state: res.data.mentors
+      });
 
-  }catch(err){
+    } catch (err) {
 
-   console.error(err);
-   alert("Error matching mentors");
+      console.error(err);
+      alert("Error submitting answers");
 
-  }
+    }
 
- };
+  };
 
- return(
-  <div>
+  return (
 
-   <Navbar/>
+    <div>
 
-   <h2>Clarification Questions</h2>
+      <Navbar />
 
-   {questions?.map((q,i)=>(
-    <div key={i} style={{marginBottom:"20px"}}>
+      <h2>Clarification Questions</h2>
 
-     <h4>{q.question}</h4>
+      {questions?.map((q, i) => (
 
-     {q.options.map((opt,j)=>(
-      <div key={j}>
+        <div key={i} style={{ marginBottom: "20px" }}>
 
-       <input
-        type="radio"
-        name={`q${i}`}
-        value={opt}
-        onChange={()=>handleChange(i,opt)}
-       />
+          <h4>{q.question}</h4>
 
-       <label style={{marginLeft:"5px"}}>
-        {opt}
-       </label>
+          {q.options.map((opt, j) => (
 
-      </div>
-     ))}
+            <div key={j}>
+
+              <input
+                type="radio"
+                name={`q${i}`}
+                value={opt}
+                onChange={() => handleChange(i, opt)}
+              />
+
+              <label style={{ marginLeft: "5px" }}>
+                {opt}
+              </label>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      ))}
+
+      <button onClick={submitAnswers}>
+        Submit Answers
+      </button>
 
     </div>
-   ))}
 
-   <button onClick={submitAnswers}>
-    Submit Answers
-   </button>
-
-  </div>
- )
+  );
 
 }
