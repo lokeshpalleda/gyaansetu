@@ -2,12 +2,9 @@ const Doubt = require("../models/Doubt");
 const User = require("../models/User");
 const analyzeDoubt = require("../utils/ai");
 
-
 // STEP 1 — CREATE DOUBT
 exports.createDoubt = async (req, res) => {
-
   try {
-
     const { userId, title, description } = req.body;
 
     const doubt = new Doubt({
@@ -18,12 +15,14 @@ exports.createDoubt = async (req, res) => {
 
     await doubt.save();
 
+    // get past doubts
     const past = await Doubt.find({ userId })
       .sort({ createdAt: -1 })
       .limit(5);
 
     const pastQueries = past.map(d => d.description);
 
+    // AI generates clarification questions
     const aiResult = await analyzeDoubt(pastQueries, description);
 
     res.json({
@@ -32,21 +31,16 @@ exports.createDoubt = async (req, res) => {
     });
 
   } catch (error) {
-
     console.error(error);
     res.status(500).json({ message: "Error creating doubt" });
-
   }
-
 };
 
 
 
 // STEP 2 — SUBMIT ANSWERS
 exports.submitAnswers = async (req, res) => {
-
   try {
-
     const { doubtId, answers } = req.body;
 
     const doubt = await Doubt.findById(doubtId);
@@ -55,46 +49,54 @@ exports.submitAnswers = async (req, res) => {
       return res.status(404).json({ message: "Doubt not found" });
     }
 
+    // save answers
     doubt.answers = answers;
     await doubt.save();
 
-    const past = await Doubt.find({ userId: doubt.userId })
-      .sort({ createdAt: -1 })
-      .limit(5);
+    // Extract keywords ONLY from title + description
+    const text = `${doubt.title} ${doubt.description}`.toLowerCase();
 
-    const pastQueries = past.map(d => d.description);
+    // simple keyword extraction
+    const keywords = text
+      .split(/[\s,.-]+/)
+      .map(k => k.trim())
+      .filter(k => k.length > 2);
 
-    const aiResult = await analyzeDoubt(
-      pastQueries,
-      doubt.description + " " + answers.join(" ")
+    console.log("EXTRACTED KEYWORDS:", keywords);
+
+    // ✅ create master sentence from doubt
+    const masterSentence = `Need help with ${doubt.title}`;
+
+    // save keywords + master sentence
+    await Doubt.findByIdAndUpdate(
+      doubtId,
+      {
+        keywords: keywords,
+        masterSentence: masterSentence
+      },
+      { returnDocument: "after" }
     );
 
-    await Doubt.findByIdAndUpdate(
-  doubtId,
-  {
-    keywords: aiResult.keywords,
-    masterSentence: aiResult.masterSentence,
-    answers
-  },
-  { returnDocument: "after" }
-);
-
-    // 🔥 FIND MENTORS USING KEYWORDS
+    // find mentors whose skills match keywords
     const mentors = await User.find({
-      skills: { $in: aiResult.keywords }
+      skills: {
+        $elemMatch: {
+          $regex: keywords.join("|"),
+          $options: "i"
+        }
+      }
     });
 
+    console.log("MENTORS FOUND:", mentors);
+
     res.json({
-      keywords: aiResult.keywords,
-      summary: aiResult.masterSentence,
-      mentors
+      keywords,
+      mentors,
+      masterSentence   // ✅ send to frontend
     });
 
   } catch (error) {
-
     console.error(error);
     res.status(500).json({ message: "Error submitting answers" });
-
   }
-
 };

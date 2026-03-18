@@ -26,6 +26,12 @@ exports.createSession = async (req, res) => {
 
     // ✅ Time restriction (next 4 hours)
     const selectedTime = new Date(scheduledTime);
+
+    if (!scheduledTime || isNaN(selectedTime.getTime())) {
+  return res.status(400).json({
+    message: "Invalid scheduledTime format"
+  });
+}
     const now = new Date();
     const maxTime = new Date(now.getTime() + 4 * 60 * 60 * 1000);
 

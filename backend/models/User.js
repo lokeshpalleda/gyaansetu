@@ -3,11 +3,11 @@ const mongoose = require("mongoose");
 const UserSchema = new mongoose.Schema({
   clerkId: String,
   name: String,
-  skills: [String],
-  rating: {
-    type: Number,
-    default: 0
-  }
+  email: {
+    type: String,
+    required: true
+  },
+  skills: [String]
 });
 
 module.exports = mongoose.model("User", UserSchema);

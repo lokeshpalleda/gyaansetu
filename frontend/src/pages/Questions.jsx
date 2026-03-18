@@ -33,9 +33,12 @@ export default function Questions() {
 
       console.log(res.data);
 
-      // navigate to mentors page
+      // ✅ send BOTH mentors and doubtId
       navigate("/mentors", {
-        state: res.data.mentors
+        state: {
+          mentors: res.data.mentors,
+          doubtId: doubtId
+        }
       });
 
     } catch (err) {
@@ -84,7 +87,17 @@ export default function Questions() {
 
       ))}
 
-      <button onClick={submitAnswers}>
+      <button
+        onClick={submitAnswers}
+        style={{
+          padding: "10px 20px",
+          background: "#007bff",
+          color: "white",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer"
+        }}
+      >
         Submit Answers
       </button>
 
