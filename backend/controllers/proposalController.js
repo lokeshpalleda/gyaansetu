@@ -1,4 +1,4 @@
-const Proposal = require("../models/proposal");
+const Proposal = require("../models/Proposal");
 const Doubt = require("../models/Doubt");
 const sendEmail = require("../services/emailService");
 
