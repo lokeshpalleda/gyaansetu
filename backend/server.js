@@ -13,13 +13,24 @@ const mentorRoutes = require("./routes/mentorRoutes");
 
 const app = express();
 
-app.use(cors());
+/* ✅ FIX CORS HERE */
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://gyaansetu-frontend.onrender.com"
+    ],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true
+  })
+);
+
 app.use(express.json());
 
-// connect database
+/* connect database */
 connectDB();
 
-// routes
+/* routes */
 app.use("/api", doubtRoutes);
 app.use("/api", proposalRoutes);
 app.use("/api", matchRoutes);
