@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const Proposal = require("../models/proposal");
+const Proposal = require("../models/Proposal");
 
 const {
   createProposal,
