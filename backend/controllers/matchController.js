@@ -1,36 +1,46 @@
-const User = require("../models/User");
+const Mentor = require("../models/mentor");
 
 exports.matchMentors = async (req, res) => {
 
   try {
 
-    // get user input
-    const { title, description } = req.body;
+    const { topic, answers } = req.body;
 
-    console.log("TITLE:", title);
-    console.log("DESCRIPTION:", description);
+    if (!topic) {
+      return res.status(400).json({
+        message: "Topic is required"
+      });
+    }
 
-    // combine text
-    const text = `${title} ${description}`.toLowerCase();
+    // Combine topic + answers
+    const text = `${topic} ${(answers || []).join(" ")}`.toLowerCase();
 
-    // simple keyword extraction
-    const keywords = text.split(" ");
+    // Remove punctuation
+    const cleanedText = text.replace(/[^\w\s]/g, "");
 
-    console.log("EXTRACTED KEYWORDS:", keywords);
+    // Split into keywords
+    const keywords = cleanedText.split(/\s+/);
 
-    // find mentors whose skills match any keyword
-    const mentors = await User.find({
+    console.log("KEYWORDS:", keywords);
+
+    // Find mentors whose skills match keywords
+    const mentors = await Mentor.find({
       skills: { $in: keywords }
     });
 
     console.log("MATCHED MENTORS:", mentors);
 
-    res.json(mentors);
+    res.json({
+      mentors
+    });
 
   } catch (error) {
 
-    console.error("ERROR:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("MATCH ERROR:", error);
+
+    res.status(500).json({
+      message: "Server error"
+    });
 
   }
 

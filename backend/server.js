@@ -9,6 +9,7 @@ const doubtRoutes = require("./routes/doubtRoutes");
 const proposalRoutes = require("./routes/proposalRoutes");
 const matchRoutes = require("./routes/matchRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
+const mentorRoutes = require("./routes/mentorRoutes");
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/api", doubtRoutes);
 app.use("/api", proposalRoutes);
 app.use("/api", matchRoutes);
 app.use("/api", sessionRoutes);
+app.use("/api", mentorRoutes);
 
 app.get("/", (req, res) => {
   res.send("GyaanSetu backend running");

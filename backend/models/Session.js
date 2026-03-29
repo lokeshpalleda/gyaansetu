@@ -4,22 +4,44 @@ const SessionSchema = new mongoose.Schema({
 
   proposalId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Proposal"
+    ref: "Proposal",
+    required: true
   },
 
-  requesterEmail: String,
+  doubtId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Doubt",
+    required: true
+  },
 
-  mentorEmail: String,
+  studentEmail: {
+    type: String,
+    required: true
+  },
 
-  scheduledTime: Date,
+  mentorEmail: {
+    type: String,
+    required: true
+  },
 
-  meetingLink: String,
+  time: {
+    type: String,
+    required: true
+  },
+
+  meetingLink: {
+    type: String,
+    required: true
+  },
 
   status: {
     type: String,
-    default: "scheduled"
+    enum: ["active", "completed"],
+    default: "active"
   }
 
 }, { timestamps: true });
 
-module.exports = mongoose.model("Session", SessionSchema);
+module.exports =
+  mongoose.models.Session ||
+  mongoose.model("Session", SessionSchema);

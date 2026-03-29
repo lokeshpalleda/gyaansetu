@@ -31,9 +31,12 @@ const ProposalSchema = new mongoose.Schema({
 
   expiresAt: {
     type: Date,
-    required: true
+    default: () => new Date(Date.now() + 60 * 60 * 1000),
+    index: { expires: 0 }
   }
 
 }, { timestamps: true });
 
-module.exports = mongoose.model("Proposal", ProposalSchema);
+module.exports =
+  mongoose.models.Proposal ||
+  mongoose.model("Proposal", ProposalSchema);
