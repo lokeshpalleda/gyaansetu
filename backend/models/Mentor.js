@@ -30,15 +30,13 @@ const mentorSchema = new mongoose.Schema({
    Convert skills to lowercase
 ================================ */
 
-mentorSchema.pre("save", function (next) {
+mentorSchema.pre("save", function () {
 
   if (this.skills && this.skills.length > 0) {
     this.skills = this.skills.map(skill =>
       skill.toLowerCase().trim()
     );
   }
-
-  next();
 
 });
 
