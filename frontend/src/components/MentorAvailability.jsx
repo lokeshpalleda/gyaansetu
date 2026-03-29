@@ -1,122 +1,243 @@
 import React, { useState } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const MentorAvailability = ({ proposalId, requesterEmail, mentorEmail }) => {
 
-  const [message, setMessage] = useState("");
-  const [meetingLink, setMeetingLink] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+  const [maxTime, setMaxTime] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // 🔥 generate next 4 hour slots
-  const generateSlots = () => {
+  /* Handle start time */
+  const handleStartTime = (e) => {
 
-    const slots = [];
-    const now = new Date();
+    const time = e.target.value;
+    setStartTime(time);
 
-    for (let i = 1; i <= 4; i++) {
+    const [h, m] = time.split(":");
 
-      const start = new Date(now.getTime() + i * 60 * 60 * 1000);
+    const start = new Date();
+    start.setHours(h);
+    start.setMinutes(m);
 
-      const label = start.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit"
-      });
+    const end = new Date(start.getTime() + 4 * 60 * 60 * 1000);
 
-      slots.push({
-        label,
-        value: start.toISOString()
-      });
-    }
+    const max = end.toTimeString().slice(0, 5);
 
-    return slots;
+    setMaxTime(max);
   };
 
-  const slots = generateSlots();
+  /* Confirm meeting */
+  const confirmMeeting = async () => {
 
-  // 🔘 when mentor clicks slot
-  const handleSelect = async (time) => {
+    if (!selectedTime) {
+      toast.error("Please select a time");
+      return;
+    }
 
     try {
 
-      const res = await axios.post(
-        "http://localhost:5000/api/session",
-        {
-          proposalId,
-          requesterEmail,
-          mentorEmail,
-          scheduledTime: time
-        }
-      );
+      setLoading(true);
 
-      console.log(res.data);
+      await axios.post("http://localhost:5000/api/sessions", {
+        proposalId,
+        requesterEmail,
+        mentorEmail,
+        time: selectedTime
+      });
 
-      setMessage("✅ Session Scheduled Successfully!");
-      setMeetingLink(res.data.session.meetingLink);
+      toast.success("Meeting link sent to mentor and student!");
 
     } catch (err) {
 
       console.error(err);
-      setMessage("❌ Error scheduling session");
+      toast.error("Failed to schedule meeting");
+
+    } finally {
+
+      setLoading(false);
 
     }
   };
 
   return (
-    <div style={{ padding: "20px" }}>
 
-      <h2>Select Time Slot</h2>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background:
+          "radial-gradient(circle at top,#1e293b,#020617)"
+      }}
+    >
 
-      {!meetingLink && (
-        <div>
+      {/* CARD */}
 
-          {slots.map((slot, index) => (
+      <div
+        style={{
+          width: "500px",
+          background: "rgba(15,23,42,0.7)",
+          backdropFilter: "blur(15px)",
+          border: "1px solid #334155",
+          borderRadius: "20px",
+          padding: "40px",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.6)"
+        }}
+      >
 
-            <button
-              key={index}
-              onClick={() => handleSelect(slot.value)}
-              style={{
-                display: "block",
-                margin: "10px 0",
-                padding: "12px",
-                cursor: "pointer",
-                borderRadius: "6px",
-                border: "1px solid #ccc",
-                background: "#f5f5f5"
-              }}
-            >
-              {slot.label}
+        {/* TITLE */}
 
-            </button>
+        <h1
+          style={{
+            fontSize: "30px",
+            marginBottom: "10px",
+            color: "#22c55e"
+          }}
+        >
+          ✔ Proposal Accepted
+        </h1>
 
-          ))}
-
-        </div>
-      )}
-
-      {message && (
-        <p style={{ marginTop: "20px", fontWeight: "bold" }}>
-          {message}
+        <p
+          style={{
+            color: "#94a3b8",
+            marginBottom: "35px"
+          }}
+        >
+          Choose a suitable time to schedule the mentorship session.
         </p>
-      )}
 
-      {meetingLink && (
-        <div style={{ marginTop: "20px" }}>
+        {/* SCHEDULER */}
 
-          <h3>Meeting Link</h3>
+        <div
+          style={{
+            background: "#020617",
+            borderRadius: "16px",
+            padding: "30px",
+            border: "1px solid #1e293b"
+          }}
+        >
 
-          <a
-            href={meetingLink}
-            target="_blank"
-            rel="noreferrer"
-            style={{ color: "blue" }}
+          <h2
+            style={{
+              fontSize: "24px",
+              marginBottom: "20px"
+            }}
           >
-            Join Meeting
-          </a>
+            Schedule Session
+          </h2>
+
+          {/* START TIME */}
+
+          <label
+            style={{
+              display: "block",
+              marginBottom: "8px",
+              color: "#cbd5f5"
+            }}
+          >
+            Select Start Time
+          </label>
+
+          <input
+            type="time"
+            value={startTime}
+            onChange={handleStartTime}
+            style={{
+              width: "180px",
+              padding: "12px",
+              borderRadius: "12px",
+              border: "1px solid #3b82f6",
+              background: "#ffffff",
+              color: "#020617",
+              fontSize: "16px",
+              fontWeight: "500",
+              marginBottom: "20px"
+            }}
+          />
+
+          {/* SELECT ACTUAL TIME */}
+
+          {startTime && (
+
+            <>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "8px",
+                  color: "#cbd5f5"
+                }}
+              >
+                Choose Session Time
+              </label>
+
+              <input
+                type="time"
+                value={selectedTime}
+                min={startTime}
+                max={maxTime}
+                onChange={(e) => setSelectedTime(e.target.value)}
+                style={{
+                  width: "180px",
+                  padding: "12px",
+                  borderRadius: "12px",
+                  border: "1px solid #3b82f6",
+                  background: "#ffffff",
+                  color: "#020617",
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  marginBottom: "30px"
+                }}
+              />
+
+              <p
+                style={{
+                  color: "#94a3b8",
+                  fontSize: "13px",
+                  marginBottom: "20px"
+                }}
+              >
+                Allowed range: {startTime} → {maxTime}
+              </p>
+
+            </>
+
+          )}
+
+          {/* BUTTON */}
+
+          <button
+            onClick={confirmMeeting}
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "14px",
+              borderRadius: "12px",
+              border: "none",
+              background:
+                "linear-gradient(90deg,#2563eb,#4f46e5)",
+              color: "white",
+              fontSize: "16px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "0.2s"
+            }}
+          >
+            {loading
+              ? "Sending..."
+              : "Confirm & Send Meeting Link"}
+          </button>
 
         </div>
-      )}
+
+      </div>
 
     </div>
+
   );
+
 };
 
 export default MentorAvailability;

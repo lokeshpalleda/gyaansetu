@@ -1,18 +1,29 @@
-const Proposal = require("../models/Proposal");
+const Proposal = require("../models/proposal");
+const Doubt = require("../models/Doubt");
 const sendEmail = require("../services/emailService");
 
-// CREATE PROPOSAL
 exports.createProposal = async (req, res) => {
   try {
-    const { doubtId, requesterEmail, mentorEmail, masterSentence } = req.body;
 
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    const { doubtId, requesterEmail, mentorEmail } = req.body;
+
+    const doubt = await Doubt.findById(doubtId);
+
+    if (!doubt) {
+      return res.status(404).json({
+        message: "Doubt not found"
+      });
+    }
+
+    const description = doubt.description;
+
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
     const proposal = new Proposal({
       doubtId,
       requesterEmail,
       mentorEmail,
-      masterSentence,
+      masterSentence: description,
       status: "pending",
       expiresAt
     });
@@ -25,7 +36,7 @@ exports.createProposal = async (req, res) => {
 A student needs help.
 
 Problem:
-${masterSentence}
+Description: ${description}
 
 Click below to accept:
 ${acceptLink}
@@ -33,7 +44,11 @@ ${acceptLink}
 (Valid for 1 hour)
 `;
 
-    await sendEmail(mentorEmail, "New Mentorship Request", message);
+    await sendEmail(
+      mentorEmail,
+      "New Mentorship Request",
+      message
+    );
 
     res.json({
       message: "Proposal created successfully",
@@ -41,30 +56,29 @@ ${acceptLink}
     });
 
   } catch (error) {
+
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+
+    res.status(500).json({
+      message: "Server error"
+    });
+
   }
 };
 
-
-// ACCEPT PROPOSAL
 exports.acceptProposal = async (req, res) => {
   try {
 
-    const proposalId = req.params.id;
-    const proposal = await Proposal.findById(proposalId);
+    const proposal = await Proposal.findById(req.params.id);
 
     if (!proposal) {
-      return res.status(404).json({ message: "Proposal not found" });
-    }
-
-    if (new Date() > proposal.expiresAt) {
-      proposal.status = "expired";
-      await proposal.save();
-      return res.status(400).json({ message: "Proposal expired" });
+      return res.status(404).json({
+        message: "Proposal not found"
+      });
     }
 
     proposal.status = "accepted";
+
     await proposal.save();
 
     res.json({
@@ -73,7 +87,43 @@ exports.acceptProposal = async (req, res) => {
     });
 
   } catch (error) {
+
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+
+    res.status(500).json({
+      message: "Server error"
+    });
+
+  }
+};
+
+exports.rejectProposal = async (req, res) => {
+  try {
+
+    const proposal = await Proposal.findById(req.params.id);
+
+    if (!proposal) {
+      return res.status(404).json({
+        message: "Proposal not found"
+      });
+    }
+
+    proposal.status = "rejected";
+
+    await proposal.save();
+
+    res.json({
+      message: "Proposal rejected",
+      proposal
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Server error"
+    });
+
   }
 };
