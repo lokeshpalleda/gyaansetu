@@ -30,15 +30,18 @@ exports.createProposal = async (req, res) => {
 
     await proposal.save();
 
+          const acceptLink = `${process.env.FRONTEND_URL}/accept/${proposal._id}`;
+
     const message = `
 A student needs help.
 
 Problem:
 Description: ${description}
 
-Please go to the GyaanSetu website and check your mentor requests to accept or reject this request.
+Click below to accept:
+${acceptLink}
 
-(This request is valid for 1 hour)
+(Valid for 1 hour)
 `;
 
     await sendEmail(
