@@ -11,11 +11,10 @@ const matchRoutes = require("./routes/matchRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
 const mentorRoutes = require("./routes/mentorRoutes");
 
-const app = express();
+const app = express()
 
 app.use(cors());
 app.use(express.json());
-
 // connect database
 connectDB();
 
