@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const Mentor = require("../models/mentor");
+const Mentor = require("../models/Mentor");
 
 /* ==================================
    MATCH MENTORS BASED ON DOUBT TEXT
