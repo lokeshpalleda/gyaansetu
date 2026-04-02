@@ -53,15 +53,17 @@ export default function AcceptProposal() {
   const fourHoursLater = new Date(now.getTime() + 4 * 60 * 60 * 1000);
 
   const formatTime = (date) => {
-    return date.toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
-    });
+    return date.toISOString().slice(11, 16);
   };
 
   const minTime = formatTime(now);
-  const maxTime = formatTime(fourHoursLater);
+
+  let maxTime = formatTime(fourHoursLater);
+
+  // If the 4 hour range crosses midnight remove max restriction
+  if (fourHoursLater.getDate() !== now.getDate()) {
+    maxTime = undefined;
+  }
 
   /* ===============================
      CONFIRM SESSION
@@ -199,7 +201,7 @@ export default function AcceptProposal() {
               marginBottom: "25px"
             }}
           >
-            Allowed range: {minTime} → {maxTime}
+            Allowed range: {minTime} → {maxTime || "Next 4 hours"}
           </p>
 
           <button
