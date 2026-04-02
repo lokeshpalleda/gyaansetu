@@ -50,10 +50,17 @@ export default function AcceptProposal() {
   ================================ */
 
   const now = new Date();
+
+  const minTime = now.toISOString().slice(11, 16);
+
   const fourHoursLater = new Date(now.getTime() + 4 * 60 * 60 * 1000);
 
-  const minTime = now.toTimeString().slice(0,5);
-  const maxTime = fourHoursLater.toTimeString().slice(0,5);
+  let maxTime = fourHoursLater.toISOString().slice(11, 16);
+
+  // If time crosses midnight remove max restriction
+  if (fourHoursLater.getDate() !== now.getDate()) {
+    maxTime = undefined;
+  }
 
   /* ===============================
      CONFIRM SESSION
@@ -70,7 +77,6 @@ export default function AcceptProposal() {
 
       setLoading(true);
 
-      // Fetch proposal again to guarantee emails exist
       const proposalRes = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/api/proposal/${id}`
       );
@@ -192,7 +198,7 @@ export default function AcceptProposal() {
               marginBottom: "25px"
             }}
           >
-            Allowed range: {minTime} → {maxTime}
+            Allowed range: {minTime} → {maxTime || "Next 4 hours"}
           </p>
 
           <button
