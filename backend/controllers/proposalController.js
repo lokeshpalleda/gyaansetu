@@ -30,7 +30,7 @@ exports.createProposal = async (req, res) => {
 
     await proposal.save();
 
-    const acceptLink = `http://localhost:5173/accept/${proposal._id}`;
+    const acceptLink = `${process.env.FRONTEND_URL}/accept/${proposal._id}`;
 
     const message = `
 A student needs help.
