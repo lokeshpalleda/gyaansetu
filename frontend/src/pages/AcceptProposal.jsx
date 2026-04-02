@@ -50,20 +50,20 @@ export default function AcceptProposal() {
   ================================ */
 
   const now = new Date();
-const fourHoursLater = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+  const fourHoursLater = new Date(now.getTime() + 4 * 60 * 60 * 1000);
 
-const formatTime = (date) => {
-  return date.toISOString().slice(11,16);
-};
+  const formatTime = (date) => {
+    return date.toISOString().slice(11, 16);
+  };
 
-const minTime = formatTime(now);
+  const minTime = formatTime(now);
 
-let maxTime = formatTime(fourHoursLater);
+  let maxTime = formatTime(fourHoursLater);
 
-// if time crosses midnight remove max limit
-if (fourHoursLater.getDate() !== now.getDate()) {
-  maxTime = undefined;
-}
+  // If the 4 hour range crosses midnight remove max restriction
+  if (fourHoursLater.getDate() !== now.getDate()) {
+    maxTime = undefined;
+  }
 
   /* ===============================
      CONFIRM SESSION
