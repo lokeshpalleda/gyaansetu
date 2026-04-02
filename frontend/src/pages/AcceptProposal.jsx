@@ -24,7 +24,7 @@ export default function AcceptProposal() {
       try {
 
         const res = await axios.get(
-          `http://localhost:5000/api/proposal/${id}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/proposal/${id}`
         );
 
         const proposal = res.data;
@@ -72,12 +72,12 @@ export default function AcceptProposal() {
 
       // Fetch proposal again to guarantee emails exist
       const proposalRes = await axios.get(
-        `http://localhost:5000/api/proposal/${id}`
+        `${import.meta.env.VITE_BACKEND_URL}/api/proposal/${id}`
       );
 
       const proposal = proposalRes.data;
 
-      await axios.post("http://localhost:5000/api/sessions", {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/sessions`, {
         proposalId: id,
         requesterEmail: proposal.requesterEmail,
         mentorEmail: proposal.mentorEmail,
