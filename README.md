@@ -266,8 +266,8 @@ EMAIL_PASS=your_email_app_password
 
 Developed by
 
-**PALLEDA LOKESH**
-**KANCHANA ADITYA RAMANA SAI NAGENDRA**  
+- **PALLEDA LOKESH**
+- **KANCHANA ADITYA RAMANA SAI NAGENDRA**  
 
 ---
 
