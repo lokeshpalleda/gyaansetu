@@ -40,7 +40,7 @@ const MentorAvailability = ({ proposalId, requesterEmail, mentorEmail }) => {
 
       setLoading(true);
 
-      await axios.post("http://localhost:5000/api/sessions", {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/sessions`, {
         proposalId,
         requesterEmail,
         mentorEmail,
